@@ -41,12 +41,12 @@ app = FastAPI(
     version="1.0.0",
     openapi_tags=[
         {
-            "name": "Prediction",
-            "description": "Heart disease risk inference endpoints.",
-        },
-        {
             "name": "Health",
             "description": "Service health and readiness endpoints.",
+        },
+        {
+            "name": "Prediction",
+            "description": "Heart disease risk inference endpoints.",
         },
         {
             "name": "Monitoring",
