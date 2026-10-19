@@ -42,3 +42,16 @@ def test_metrics_endpoint() -> None:
     response = client.get("/metrics")
     assert response.status_code == 200
     assert "http_requests_total" in response.text
+
+
+def test_openapi_groups_endpoints_by_domain() -> None:
+    schema = client.get("/openapi.json").json()
+
+    assert schema["paths"]["/predict"]["post"]["tags"] == ["Prediction"]
+    assert schema["paths"]["/health"]["get"]["tags"] == ["Health"]
+    assert schema["paths"]["/metrics"]["get"]["tags"] == ["Monitoring"]
+    assert {tag["name"] for tag in schema["tags"]} == {
+        "Prediction",
+        "Health",
+        "Monitoring",
+    }

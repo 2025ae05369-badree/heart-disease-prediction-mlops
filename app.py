@@ -36,10 +36,27 @@ if not MODEL_PATH.exists():
                 f"Unable to build model before API startup: {exc}"
             ) from exc
 
-app = FastAPI(title="Heart Disease Risk Prediction API", version="1.0.0")
+app = FastAPI(
+    title="Heart Disease Risk Prediction API",
+    version="1.0.0",
+    openapi_tags=[
+        {
+            "name": "Prediction",
+            "description": "Heart disease risk inference endpoints.",
+        },
+        {
+            "name": "Health",
+            "description": "Service health and readiness endpoints.",
+        },
+        {
+            "name": "Monitoring",
+            "description": "Operational metrics endpoints.",
+        },
+    ],
+)
 
 # Exposes request-count/latency metrics in Prometheus format at /metrics.
-Instrumentator().instrument(app).expose(app)
+Instrumentator().instrument(app).expose(app, tags=["Monitoring"])
 
 
 @app.middleware("http")
@@ -82,14 +99,14 @@ class PredictionResponse(BaseModel):
     label: str
 
 
-@app.get("/health")
+@app.get("/health", tags=["Health"])
 def health() -> dict[str, str | bool]:
     model_ready = MODEL_PATH.exists()
     logger.info("GET /health -> model_ready=%s", model_ready)
     return {"status": "ok", "model_ready": model_ready}
 
 
-@app.post("/predict", response_model=PredictionResponse)
+@app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
 def predict(record: PatientRecord) -> PredictionResponse:
     if not MODEL_PATH.exists():
         raise HTTPException(
