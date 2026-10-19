@@ -1,0 +1,37 @@
+groups:
+    - name: heart-disease-api
+      interval: 15s
+      rules:
+          - record: job:http_requests:rate5m
+            expr: sum(rate(http_requests_total[5m])) by (handler, method, status)
+
+          - record: job:http_request_rate_by_method:rate5m
+            expr: sum(rate(http_requests_total[5m])) by (method)
+
+          - record: job:http_latency:p95_ms
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000
+
+          - record: job:predict_requests:rate5m
+            expr: sum(rate(http_requests_total{handler="/predict"}[5m]))
+
+          - record: job:predict_success:ratio5m
+            expr: |
+                100 * sum(rate(http_requests_total{handler="/predict",status=~"2.."}[5m]))
+                    / sum(rate(http_requests_total{handler="/predict"}[5m]))
+
+          - record: job:predict_error:ratio5m
+            expr: |
+                100 * sum(rate(http_requests_total{handler="/predict",status=~"[45].."}[5m]))
+                    / sum(rate(http_requests_total{handler="/predict"}[5m]))
+
+          - record: job:predict_latency:p50_ms
+            expr: histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket{handler="/predict"}[5m])) by (le)) * 1000
+
+          - record: job:predict_latency:p95_ms
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{handler="/predict"}[5m])) by (le)) * 1000
+
+          - record: job:predict_latency:p99_ms
+            expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{handler="/predict"}[5m])) by (le)) * 1000
+
+          - record: job:health_ok:rate5m
+            expr: sum(rate(http_requests_total{handler="/health",status=~"2.."}[5m]))
