@@ -133,7 +133,15 @@ requests to the main branches:
 flake8 .  →  pytest -q  →  python main.py
 ```
 
-![Pending: CI workflow result](../screenshots/ci-run.png)
+**GitHub Actions workflow result**
+
+![CI workflow result](../screenshots/ci-run/github-workflows.png)
+
+**Workflow triggers on pull requests and pushes to the main branches**
+
+![Pull request workflow triggers](../screenshots/ci-run/pull-request.png)
+![Merge into main workflow triggers](../screenshots/ci-run/merge-into-main.png)
+![Merge into main build info](../screenshots/ci-run/merge-into-main-build-info.png)
 
 ## 8. Deployment
 
