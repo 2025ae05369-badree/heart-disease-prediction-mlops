@@ -1,13 +1,13 @@
 # Heart Disease Risk Prediction — MLOps Report
 
-**Course:** AIMLCZG523 — MLOps  
-**Assignment:** 01  
-**Dataset:** UCI Heart Disease (Cleveland)
-**Name:** BADRINATHAN S.  
-**Student ID:** 2025AE05369
-**Email:** 2025ae05369@wilp.bits-pilani.ac.in  
-**Git Repository:** https://github.com/2025ae05369-badree/heart-disease-prediction-mlops.git
-**Google Drive Link:** To be provided
+- **Course:** AIMLCZG523 — MLOps
+- **Assignment:** 01
+- **Dataset:** UCI Heart Disease (Cleveland)
+- **Name:** BADRINATHAN S.
+- **Student ID:** 2025AE05369
+- **Email:** 2025ae05369@wilp.bits-pilani.ac.in
+- **Git Repository:** https://github.com/2025ae05369-badree/heart-disease-prediction-mlops.git
+- **Google Drive Link:** To be provided
 
 ## 1. Objective
 
