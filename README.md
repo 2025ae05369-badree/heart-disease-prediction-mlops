@@ -18,6 +18,24 @@ Run the commands below from the repository root.
 
 ### 1. Create the environment
 
+Check the required tools before starting:
+
+```bash
+python3 --version
+uv --version
+docker --version
+kubectl version --client
+```
+
+Install `uv` with Astral's official installer if it is not already installed:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source ~/.bashrc
+```
+
+Setup the virtual environment and install dependencies:
+
 ```bash
 uv venv --python 3.12 .venv
 source .venv/bin/activate
@@ -103,12 +121,19 @@ Example requests:
 
 ```bash
 curl http://localhost:8000/health
+curl http://localhost:8000/metrics
+```
 
-curl -X POST http://localhost:8000/predict \
+Generate varied API traffic before querying metrics. The first two requests exercise both model outcomes (`no_disease` and `disease_present`):
+
+```bash
+curl -sS -X POST http://localhost:8000/predict \
   -H "Content-Type: application/json" \
   -d '{"age":63,"sex":1,"cp":1,"trestbps":145,"chol":233,"fbs":1,"restecg":2,"thalach":150,"exang":0,"oldpeak":2.3,"slope":3,"ca":0,"thal":6}'
 
-curl http://localhost:8000/metrics
+curl -sS -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"age":67,"sex":1,"cp":4,"trestbps":160,"chol":286,"fbs":0,"restecg":2,"thalach":108,"exang":1,"oldpeak":1.5,"slope":2,"ca":3,"thal":3}'
 ```
 
 ## Docker
@@ -188,13 +213,33 @@ Remove the deployment when finished:
 kubectl delete -f deployment.yaml
 ```
 
-If a pod is not scheduled or does not become ready, inspect its events and
-logs:
+### Troubleshooting Kubernetes Deployment
+
+If the pod remains `0/1 Pending`, inspect the scheduler, node, and cluster
+networking:
 
 ```bash
 kubectl describe pod -l app=heart-disease-api
 kubectl get events --sort-by=.metadata.creationTimestamp
 kubectl logs -l app=heart-disease-api
+
+kubectl get nodes
+kubectl describe node minikube
+kubectl get pods -n kube-system -o wide
+```
+
+An untolerated `node.kubernetes.io/not-ready` taint together with
+`NetworkPluginNotReady` means Minikube's CNI did not initialize. If the
+`kindnet` pod is in `ImagePullBackOff` because DNS resolution for Docker Hub
+timed out, preload the exact image tag reported by `kubectl describe`:
+
+```bash
+kubectl describe pod -n kube-system -l k8s-app=kindnet
+docker pull docker.io/kindest/kindnetd:v20260820-69b56db7
+minikube image load docker.io/kindest/kindnetd:v20260820-69b56db7
+kubectl delete pod -n kube-system -l k8s-app=kindnet
+kubectl wait --for=condition=Ready node/minikube --timeout=3m
+kubectl rollout status deployment/heart-disease-api --timeout=5m
 ```
 
 ## Repository structure
